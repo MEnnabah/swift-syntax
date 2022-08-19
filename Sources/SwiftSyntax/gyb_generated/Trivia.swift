@@ -341,6 +341,11 @@ public func +(lhs: Trivia, rhs: Trivia) -> Trivia {
   return Trivia(pieces: lhs.pieces + rhs.pieces)
 }
 
+/// Concatenates two collections of `Trivia` into the left-hand side.
+public func +=(lhs: inout Trivia, rhs: Trivia) {
+  lhs = lhs + rhs
+}
+
 extension TriviaPiece: Equatable {}
 
 extension TriviaPiece {
