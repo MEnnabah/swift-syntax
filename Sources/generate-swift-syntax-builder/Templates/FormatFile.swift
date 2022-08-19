@@ -93,5 +93,87 @@ let formatFile = SourceFile {
         }
       ))
     }
+
+    FunctionDecl(
+      modifiers: [TokenSyntax.private],
+      identifier: .identifier("requiresLeadingNewline"),
+      signature: FunctionSignature(
+        input: ParameterClause {
+          FunctionParameter(
+            firstName: .wildcard,
+            secondName: .identifier("syntax"),
+            colon: .colon,
+            type: "SyntaxProtocol"
+          )
+        },
+        output: "Bool"
+      )
+    ) {
+      SwitchStmt(
+        expression: FunctionCallExpr(MemberAccessExpr(
+          base: FunctionCallExpr("Syntax") {
+            TupleExprElement(expression: "syntax")
+          },
+          name: "as"
+        )) {
+          TupleExprElement(expression: MemberAccessExpr(base: "SyntaxEnum", name: "self"))
+        }
+      ) {
+        // TODO: Generate cases based on requiresLeadingNewline
+        // (which however is only defined on child not on nodes?)
+        SwitchCase(label: SwitchDefaultLabel()) {
+          ReturnStmt(expression: BooleanLiteralExpr(false))
+        }
+      }
+    }
+
+    FunctionDecl(
+      modifiers: [TokenSyntax.public],
+      identifier: .identifier("_leadingTrivia"),
+      signature: FunctionSignature(
+        input: ParameterClause {
+          FunctionParameter(
+            firstName: .identifier("for").withTrailingTrivia(.space),
+            secondName: .identifier("syntax"),
+            colon: .colon,
+            type: "SyntaxProtocol"
+          )
+        },
+        output: "Trivia"
+      )
+    ) {
+      VariableDecl(
+        .var,
+        name: "leadingTrivia",
+        type: "Trivia",
+        initializer: ArrayExpr()
+      )
+
+      IfStmt(
+        conditions: ExprList {
+          FunctionCallExpr("requiresLeadingNewline") {
+            TupleExprElement(expression: "syntax")
+          }
+        }
+      ) {
+        SequenceExpr {
+          "leadingTrivia"
+          BinaryOperatorExpr("+=")
+          MemberAccessExpr(name: "newline")
+          BinaryOperatorExpr("+")
+          "_indentTrivia"
+        }
+      }
+
+      SequenceExpr {
+        "leadingTrivia"
+        BinaryOperatorExpr("+=")
+        MemberAccessExpr(base: "syntax", name: "leadingTrivia")
+        BinaryOperatorExpr("??")
+        ArrayExpr()
+      }
+
+      ReturnStmt(expression: "leadingTrivia")
+    }
   }
 }

@@ -30,4 +30,18 @@ extension Format {
   public var _indentTrivia: Trivia {
     return indents == 0 ? .zero : Trivia.spaces(indents * indentWidth)
   }
+  private func requiresLeadingNewline(_ syntax: SyntaxProtocol) -> Bool {
+    switch Syntax(syntax).as(SyntaxEnum.self) {
+    default : 
+      return false
+    }
+  }
+  public func _leadingTrivia(for syntax: SyntaxProtocol) -> Trivia {
+    var leadingTrivia: Trivia = []
+    if requiresLeadingNewline(syntax) {
+      leadingTrivia += .newline + _indentTrivia
+    }
+    leadingTrivia += syntax.leadingTrivia ?? []
+    return leadingTrivia
+  }
 }
